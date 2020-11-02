@@ -52,28 +52,22 @@ namespace Api.Controller
 
         [DisableRequestSizeLimit]
         [HttpPost("PostSingleFile")]
-        public async Task<string> PostFile(IFormFile file)
+        public async Task<Guid> PostFile(IFormFile file)
         {
-            var header = Request.Headers["Sys"].ToString();
-            if (!string.IsNullOrEmpty(header))
+            string fileName = "/" + Guid.NewGuid().ToString() + "." + file.FileName.Split(".")[^1];
+            using FileStream fs = new FileStream(_config.FullPath + fileName, FileMode.CreateNew);
+            await file.CopyToAsync(fs);
+            var mod = new Model.File
             {
-                string fileName = "/" + Guid.NewGuid().ToString() + "." + file.FileName.Split(".")[^1];
-                using FileStream fs = new FileStream(_config.FullPath + fileName, FileMode.CreateNew);
-                await file.CopyToAsync(fs);
-                var mod = new Model.File
-                {
-                    AddTime = DateTime.Now,
-                    Ext = file.FileName.Split(".")[^1],
-                    FileName = file.FileName,
-                    MapPath = _config.FrontExt + fileName,
-                    Id = Guid.NewGuid(),
-                    Sys = header
-                };
-                _context.Files.Add(mod);
-                _context.SaveChanges();
-                return mod.Id.ToString();
-            }
-            return string.Empty;
+                AddTime = DateTime.Now,
+                Ext = file.FileName.Split(".")[^1],
+                FileName = file.FileName,
+                MapPath = _config.FrontExt + fileName,
+                Id = Guid.NewGuid(),
+            };
+            _context.Files.Add(mod);
+            _context.SaveChanges();
+            return mod.Id.Value;
         }
 
         [HttpGet("GetFile")]
