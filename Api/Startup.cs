@@ -1,22 +1,17 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Api.Common;
-using Api.Model;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.AspNetCore.Http.Features;
+using Api.Model;
+using Api.Common;
+using Microsoft.EntityFrameworkCore;
 
 namespace Api
 {
@@ -34,12 +29,15 @@ namespace Api
         {
             services.AddControllers();
             FileConfig = Configuration.GetSection("FileService").Get<FileServConfig>();
+            FileConfig.CheckAuto();
+
+            // 添加 dbcontext 根据自己的情况可以换成其他的 数据库
             services.AddDbContext<FileDbContext>(option =>
             {
                 option.UseSqlite(Configuration.GetConnectionString("Sqlite"));
                 // option.UseSqlServer(Configuration.GetConnectionString("Default"));
             });
-
+            // 一般来说像文件服务这种东西 需要添加跨域设置 
             services.AddCors(option =>
             {
                 option.AddDefaultPolicy(builder =>
@@ -53,7 +51,15 @@ namespace Api
                     builder.WithOrigins("http://*****,https://*****").AllowAnyHeader().AllowAnyMethod();
                 });
             });
+
+            // 限制文件(body)大小
+            services.Configure<FormOptions>(option =>
+            {
+                option.MultipartBodyLengthLimit = FileConfig.MaxSize;
+            });
+            // 注册 配置
             services.AddSingleton(FileConfig);
+
             services.AddSwaggerGen(
                 options =>
                 {
@@ -65,6 +71,26 @@ namespace Api
                     {
                         options.IncludeXmlComments(item.FullName, true);
                     }
+
+                    // // 可以在header中添加 全局的 token
+                    // options.AddSecurityDefinition("token", new OpenApiSecurityScheme
+                    // {
+                    //     Description = "JWT授权(数据将在请求头中进行传输) 在下方输入Bearer {token} 即可，注意中间有空格",
+                    //     Name = "Authorization",
+                    //     In = ParameterLocation.Header,
+                    //     Type = SecuritySchemeType.ApiKey
+                    // });
+                    // options.AddSecurityRequirement(new OpenApiSecurityRequirement{
+                    //     {
+                    //         new OpenApiSecurityScheme{
+                    //             Reference = new OpenApiReference{
+                    //                 Id = "token",
+                    //                 Type = ReferenceType.SecurityScheme
+                    //             }
+                    //         },
+                    //         Array.Empty<string>()
+                    //     }
+                    // });
                     // options.OperationFilter<AddHeader>();
                 }
             );
@@ -77,23 +103,25 @@ namespace Api
             {
                 app.UseDeveloperExceptionPage();
             }
-            // app.UseHttpsRedirection();
 
-            // app.UseCors("any");
             app.UseCors();
+            // app.UseCors("notany");
 
             app.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = new PhysicalFileProvider(FileConfig.FileStore),
-                RequestPath = new PathString(FileConfig.FileServPath)
+                RequestPath = new PathString(FileConfig.ServeMapPath),
+                ServeUnknownFileTypes = FileConfig.UseUnknowFiles,
             });
-            app.UseDirectoryBrowser(new DirectoryBrowserOptions
+
+            if (FileConfig.UseDirectoryBrowser)
             {
-                FileProvider = new PhysicalFileProvider(FileConfig.FileStore),
-                RequestPath = new PathString(FileConfig.FileServPath)
-            });
-
-
+                app.UseDirectoryBrowser(new DirectoryBrowserOptions
+                {
+                    FileProvider = new PhysicalFileProvider(FileConfig.FileStore),
+                    RequestPath = new PathString(FileConfig.ServeMapPath),
+                });
+            }
             app.UseSwagger();
             app.UseSwaggerUI(options =>
             {
@@ -102,6 +130,7 @@ namespace Api
 
             app.UseRouting();
 
+            // app.UseAuthentication;
             // app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

@@ -7,9 +7,12 @@ namespace Api.Model
     {
         [Key]
         public Guid? Id { get; set; }
+        [MaxLength(100)]
         public string FileName { get; set; }
         public string MapPath { get; set; }
+        [MaxLength(20)]
         public string Ext { get; set; }
+        [MaxLength(20)]
         public string Sys { get; set; }
         public DateTime? AddTime { get; set; }
     }
