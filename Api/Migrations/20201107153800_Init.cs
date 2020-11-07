@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Api.Migrations
 {
-    public partial class init : Migration
+    public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -12,10 +12,10 @@ namespace Api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    FileName = table.Column<string>(nullable: true),
+                    FileName = table.Column<string>(maxLength: 100, nullable: true),
                     MapPath = table.Column<string>(nullable: true),
-                    Ext = table.Column<string>(nullable: true),
-                    Sys = table.Column<string>(nullable: true),
+                    Ext = table.Column<string>(maxLength: 20, nullable: true),
+                    Sys = table.Column<string>(maxLength: 20, nullable: true),
                     AddTime = table.Column<DateTime>(nullable: true)
                 },
                 constraints: table =>
