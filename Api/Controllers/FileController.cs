@@ -63,7 +63,7 @@ namespace Api.Controller
                 AddTime = DateTime.Now,
                 Ext = file.FileName.Split(".")[^1],
                 FileName = file.FileName,
-                MapPath = _config.FrontExt + fileName,
+                MapPath = _config.FrontExt + "/" + file.FileName,
                 Id = Guid.NewGuid(),
             };
             _context.Files.Add(mod);
@@ -92,7 +92,7 @@ namespace Api.Controller
         public async Task<IActionResult> GetFile(Guid? id)
         {
             var file = _context.Files.First(item => item.Id == id);
-            var filepath = _config.FileStore + file.MapPath;
+            var filepath = _config.FileStore + "/" + file.MapPath;
             var memoryStream = new MemoryStream();
             using var stream = new FileStream(filepath, FileMode.Open);
             await stream.CopyToAsync(memoryStream);
@@ -100,6 +100,12 @@ namespace Api.Controller
             _log.LogInformation($"Download File {file.FileName} , Id : {id.Value}");
             Response.Headers.Add("Content-Disposition", "attachment; filename=" + HttpUtility.UrlEncode(file.FileName, Encoding.UTF8));
             return new FileStreamResult(memoryStream, "application/octet-stream");
+        }
+
+        [HttpGet("GetFileInfo")]
+        public async Task<Model.File> GetFileInfo(Guid? id)
+        {
+            return await _context.Files.FindAsync(id);
         }
     }
 }
