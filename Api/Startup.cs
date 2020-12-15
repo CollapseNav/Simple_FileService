@@ -46,10 +46,10 @@ namespace Api
                         .AllowAnyHeader()
                         .AllowAnyMethod();
                 });
-                option.AddPolicy("notany", builder =>
-                {
-                    builder.WithOrigins("http://*****,https://*****").AllowAnyHeader().AllowAnyMethod();
-                });
+                // option.AddPolicy("notany", builder =>
+                // {
+                //     builder.WithOrigins("http://*****,https://*****").AllowAnyHeader().AllowAnyMethod();
+                // });
             });
 
             // 限制文件(body)大小

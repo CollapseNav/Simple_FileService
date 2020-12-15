@@ -14,6 +14,8 @@ namespace Api.Model
         public string Ext { get; set; }
         [MaxLength(20)]
         public string Sys { get; set; }
+        [MaxLength(50)]
+        public string Size { get; set; }
         public DateTime? AddTime { get; set; }
     }
 }
