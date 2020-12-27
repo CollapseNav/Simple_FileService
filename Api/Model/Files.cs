@@ -17,5 +17,6 @@ namespace Api.Model
         [MaxLength(50)]
         public string Size { get; set; }
         public DateTime? AddTime { get; set; }
+        public string ContentType { get; set; }
     }
 }

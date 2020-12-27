@@ -71,6 +71,7 @@ namespace Api.Controller
                 MapPath = _config.FrontExt + "/" + fileName,
                 Size = file.Length.ToString(),
                 Id = Guid.NewGuid(),
+                ContentType = file.ContentType
             };
             _context.Files.Add(mod);
             _context.SaveChanges();
@@ -104,15 +105,15 @@ namespace Api.Controller
                 range = range[(range.IndexOf("=") + 1)..range.IndexOf("-")];
             var file = _context.Files.First(item => item.Id == id);
             var filepath = _config.FileStore + "/" + file.MapPath;
-            new FileExtensionContentTypeProvider().TryGetContentType(file.FileName, out string contextType);
             var memoryStream = new MemoryStream();
             using var stream = new FileStream(filepath, FileMode.Open);
             await stream.CopyToAsync(memoryStream);
             memoryStream.Seek(0, SeekOrigin.Begin);
             _log.LogInformation($"Download File {file.FileName} , Id : {id.Value}");
 
+
             Response.Headers.Add("Content-Disposition", "attachment; filename=" + HttpUtility.UrlEncode(file.FileName, Encoding.UTF8));
-            Response.Headers.Add("Content-Type", contextType);
+            Response.Headers.Add("Content-Type", file.ContentType);
             Response.ContentLength = long.Parse(file.Size);
             Response.Headers.Add("Accept-Ranges", "bytes");
             Response.Headers.Add("Content-Range", ((string.IsNullOrEmpty(range.ToString()) ? 0 : int.Parse(range)) + (long.Parse(file.Size) - 1)).ToString());

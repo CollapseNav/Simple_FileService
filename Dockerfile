@@ -12,7 +12,9 @@ COPY ./ ./
 RUN  dotnet publish Api -c Release -o /app
 COPY ./Api/Data.db /app/Data.db
 
-FROM base AS final
+
+FROM base AS dev
 WORKDIR /app
 COPY --from=publish /app .
+ENV FileService:ServeMapPath=''
 ENTRYPOINT ["dotnet", "Api.dll"]
