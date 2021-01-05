@@ -125,7 +125,7 @@ namespace Api
             app.UseSwagger();
             app.UseSwaggerUI(options =>
             {
-                options.SwaggerEndpoint("/swagger/file/swagger.json", "FileService API");
+                options.SwaggerEndpoint("../swagger/file/swagger.json", "FileService API");
             });
 
             app.UseRouting();
