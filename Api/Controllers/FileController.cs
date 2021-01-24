@@ -10,73 +10,71 @@ using Api.Model;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace Api.Controller
 {
-    [Route("File")]
+    [Route("api/[controller]")]
     public class FileController : ControllerBase
     {
         private readonly FileServConfig _config;
         private readonly FileDbContext _context;
         private readonly ILogger _log;
+        private DbSet<Model.File> _file;
+        private DbSet<Dir> _dir;
         public FileController(ILogger<FileController> logger, FileServConfig config, FileDbContext dbContext)
         {
             _log = logger;
             _config = config;
             _context = dbContext;
+            _file = _context.Files;
+            _dir = _context.Dirs;
         }
 
-        /// <summary>
-        /// 多文件上传
-        /// </summary>
-        [DisableRequestSizeLimit]
-        [HttpPost("PostFiles")]
-        public async Task<ReturnFileMapPath> PostFiles(IFormFile[] files)
-        {
-            var fileIds = new List<string>();
-            foreach (var file in files)
-                fileIds.Add(await SaveFile(file));
-            return new ReturnFileMapPath { Total = fileIds.Count, FileId = fileIds };
-        }
+        // /// <summary>
+        // /// 多文件上传
+        // /// </summary>
+        // [DisableRequestSizeLimit]
+        // [HttpPost("PostFiles")]
+        // public async Task<ReturnFileMapPath> PostFiles([FromBody] Model.File[] inputs, IFormFile[] files)
+        // {
+        //     var fileIds = new List<string>();
+        //     for (int i = 0; i < inputs.Length; i++)
+        //         fileIds.Add(await SaveFile(inputs[i], files[i]));
+        //     return new ReturnFileMapPath { Total = fileIds.Count, FileId = fileIds };
+        // }
         /// <summary>
         /// 单文件上传
         /// </summary>
         [DisableRequestSizeLimit]
-        [HttpPost("PostSingleFile")]
-        public async Task<string> PostFile(IFormFile file)
+        [HttpPost("PostFile/{dirId}")]
+        public async Task<string> PostFile(Guid dirId)
         {
-            return await SaveFile(file);
+            var file = HttpContext.Request.Form.Files[0];
+            return await SaveFile(dirId, file);
         }
 
-        private async Task<string> SaveFile(IFormFile file)
+        private async Task<string> SaveFile(Guid dirId, IFormFile file)
         {
-            var extension = Path.GetExtension(file.FileName);
-            string fileName = GetFileName(file.FileName);
+            var dir = await _dir.FindAsync(dirId);
+            var model = new Model.File { MapPath = dir.MapPath, ParentId = dirId }.Init(file);
+
             try
             {
-                using FileStream fs = new FileStream(_config.FullPath + "/" + fileName, FileMode.CreateNew);
+                using FileStream fs = new FileStream(_config.FileStore + _config.FullPath + model.MapPath, FileMode.CreateNew);
                 await file.CopyToAsync(fs);
             }
             catch (IOException)
             {
                 throw new IOException("文件上传失败,请稍候重试.");
             }
-            var mod = new Model.File
-            {
-                AddTime = DateTime.Now,
-                Ext = extension,
-                FileName = file.FileName,
-                MapPath = _config.FrontExt + "/" + fileName,
-                Size = file.Length.ToString(),
-                Id = Guid.NewGuid(),
-                ContentType = file.ContentType
-            };
-            _context.Files.Add(mod);
+
+            _file.Add(model);
             _context.SaveChanges();
-            _log.LogInformation($"Save File {file.FileName} , size: {file.Length}; type: {extension};");
-            return mod.Id.ToString();
+            _log.LogInformation($"Save File {file.FileName} , size: {file.Length}; type: {model.Ext};");
+            return model.Id.ToString();
         }
 
         private string GetFileName(string fileName)
@@ -103,14 +101,13 @@ namespace Api.Controller
             var range = Request.Headers["Range"].ToString();
             if (range.Length > 5)
                 range = range[(range.IndexOf("=") + 1)..range.IndexOf("-")];
-            var file = _context.Files.First(item => item.Id == id);
-            var filepath = _config.FileStore + "/" + file.MapPath;
+            var file = _file.First(item => item.Id == id);
+            var filepath = _config.FileStore + _config.FullPath + "/" + file.MapPath;
             var memoryStream = new MemoryStream();
             using var stream = new FileStream(filepath, FileMode.Open);
             await stream.CopyToAsync(memoryStream);
             memoryStream.Seek(0, SeekOrigin.Begin);
             _log.LogInformation($"Download File {file.FileName} , Id : {id.Value}");
-
 
             Response.Headers.Add("Content-Disposition", "attachment; filename=" + HttpUtility.UrlEncode(file.FileName, Encoding.UTF8));
             Response.Headers.Add("Content-Type", file.ContentType);
@@ -126,7 +123,7 @@ namespace Api.Controller
         [HttpGet("GetFileInfo")]
         public async Task<Model.File> GetFileInfo(Guid? id)
         {
-            return await _context.Files.FindAsync(id);
+            return await _file.FindAsync(id);
         }
     }
 }

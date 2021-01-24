@@ -29,15 +29,13 @@ namespace Api
         {
             services.AddControllers();
             FileConfig = Configuration.GetSection("FileService").Get<FileServConfig>();
-            FileConfig.CheckAuto();
 
             // 添加 dbcontext 根据自己的情况可以换成其他的 数据库
             services.AddDbContext<FileDbContext>(option =>
             {
-                option.UseSqlite(Configuration.GetConnectionString("Sqlite"));
-                // option.UseSqlServer(Configuration.GetConnectionString("Default"));
+                option.UseSqlite(Configuration.GetConnectionString("Default"));
             });
-            // 一般来说像文件服务这种东西 需要添加跨域设置 
+            // 一般来说像文件服务这种东西 需要添加跨域设置
             services.AddCors(option =>
             {
                 option.AddDefaultPolicy(builder =>
