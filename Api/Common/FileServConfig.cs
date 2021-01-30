@@ -20,7 +20,10 @@ namespace Api.Common
         public string FileStore
         {
             get { return filestore; }
-            set { filestore = Path.IsPathRooted(value) ? value : Directory.GetCurrentDirectory() + "/" + value; }
+            set
+            {
+                filestore = value.StartsWith("/") ? value : Directory.GetCurrentDirectory() + "/" + value;
+            }
         }
         public string FullPath
         {

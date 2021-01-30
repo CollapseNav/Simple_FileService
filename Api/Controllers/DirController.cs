@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,24 +8,23 @@ using Api.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Api.Controller
 {
     [Route("api/[controller]")]
-    public class DirController : ControllerBase
+    public class DirController : BaseController<Dir>
     {
-        private readonly FileServConfig _config;
-        private readonly FileDbContext _context;
-        private DbSet<Model.File> _file;
-        private DbSet<Dir> _dir;
-        private readonly ILogger _log;
-        public DirController(ILogger<FileController> logger, FileServConfig config, FileDbContext dbContext)
+        private readonly DbSet<Model.File> _file;
+
+        public DirController(ILogger<FileController> logger, FileServConfig config, FileDbContext dbContext) : base(logger, config, dbContext)
         {
-            _log = logger;
-            _config = config;
-            _context = dbContext;
             _file = _context.Files;
-            _dir = _context.Dirs;
+        }
+
+        protected override IQueryable<Dir> GetQuery(Dir input)
+        {
+            return _db.WhereIf(input.MapPath, item => item.MapPath == input.MapPath);
         }
 
         [HttpPost, Route("CreateDir")]
@@ -38,14 +38,13 @@ namespace Api.Controller
             }
             else if (input.ParentId.HasValue)
             {
-                var dir = await _dir.FindAsync(input.ParentId);
+                var dir = await _db.FindAsync(input.ParentId);
                 input.MapPath += dir.MapPath + "/" + input.FileName;
             }
             if (Directory.Exists(input.MapPath)) return null;
 
 
-            await _dir.AddAsync(input);
-            await _context.SaveChangesAsync();
+            await AddAsync(input);
 
             Directory.CreateDirectory(_config.FileStore + _config.FullPath + input.MapPath);
             return input;
@@ -54,13 +53,16 @@ namespace Api.Controller
         [HttpGet, Route("GetRootDir")]
         public async Task<Dir> GetRootDir()
         {
-            return await _dir.Where(item => item.MapPath == string.Empty).Include(item => item.Dirs).Include(item => item.Files).FirstAsync();
+            var query = _db.Where(item => item.MapPath == string.Empty);
+            if (query.Count() > 0)
+                return await query.Include(item => item.Dirs).Include(item => item.Files).FirstAsync();
+            else return null;
         }
 
         [HttpGet, Route("GetDirTree")]
         public async Task<Dir> GetDirTree(Guid? id)
         {
-            var dir = await _dir.Where(item => item.Id == id).Include(item => item.Dirs).Include(item => item.Files).FirstOrDefaultAsync();
+            var dir = await _db.Where(item => item.Id == id).Include(item => item.FileType).Include(item => item.Dirs).Include(item => item.Files).FirstOrDefaultAsync();
             return dir;
         }
 
@@ -70,7 +72,7 @@ namespace Api.Controller
         [HttpGet("GetDirInfo")]
         public async Task<Dir> GetDirInfo(Guid? id)
         {
-            return await _dir.FindAsync(id);
+            return await FindAsync(id);
         }
     }
 }

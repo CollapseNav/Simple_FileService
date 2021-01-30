@@ -6,20 +6,21 @@ using Api.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Api.Controller
 {
     [Route("api/[controller]")]
-    public class FileTypeController : ControllerBase
+    public class FileTypeController : BaseController<FileType>
     {
-        private readonly FileServConfig _config;
-        private readonly FileDbContext _context;
-        private readonly ILogger _log;
-        public FileTypeController(ILogger<FileController> logger, FileServConfig config, FileDbContext dbContext)
+        public FileTypeController(ILogger<FileController> logger, FileServConfig config, FileDbContext dbContext) : base(logger, config, dbContext)
         {
-            _log = logger;
-            _config = config;
-            _context = dbContext;
+        }
+
+        [HttpPost, Route("[action]")]
+        public async Task AddFileType([FromBody] FileType input)
+        {
+            await AddAsync(input);
         }
     }
 }

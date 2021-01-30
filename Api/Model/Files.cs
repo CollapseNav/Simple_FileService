@@ -11,8 +11,6 @@ namespace Api.Model
     {
         [MaxLength(20)]
         public string Ext { get; set; }
-        public Guid? TypeId { get; set; }
-        public virtual FileType FileType { get; set; }
         public string ContentType { get; set; }
         [ForeignKey("ParentId"), JsonIgnore]
         public virtual Dir Parent { get; set; }

@@ -18,7 +18,7 @@ namespace Api.Model
         }
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            if (!Directory.Exists(_config.FullPath))
+            if (!Directory.Exists(_config.FileStore + _config.FullPath))
             {
                 builder.Entity<Dir>().HasData(new Dir
                 {

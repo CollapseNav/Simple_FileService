@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Api.Model;
 using Api.Common;
 using Microsoft.EntityFrameworkCore;
+using Api.Controller;
 
 namespace Api
 {
@@ -28,7 +29,9 @@ namespace Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            FileConfig = Configuration.GetSection("FileService").Get<FileServConfig>();
+            var fileoption = Configuration.GetSection("FileServConfig");
+            // services.Configure<FileServConfig>(fileoption);
+            FileConfig = fileoption.Get<FileServConfig>();
 
             // 添加 dbcontext 根据自己的情况可以换成其他的 数据库
             services.AddDbContext<FileDbContext>(option =>
@@ -57,6 +60,9 @@ namespace Api
             });
             // 注册 配置
             services.AddSingleton(FileConfig);
+
+            services.AddScoped<DirController, DirController>();
+            services.AddScoped<FileController, FileController>();
 
             services.AddSwaggerGen(
                 options =>

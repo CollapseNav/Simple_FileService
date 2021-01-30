@@ -16,6 +16,8 @@ namespace Api.Model
         [MaxLength(50)]
         public string Size { get; set; }
         public Guid? ParentId { get; set; }
+        public Guid? TypeId { get; set; }
+        public virtual FileType FileType { get; set; }
         public bool IsVisible { get; set; } = true;
     }
 }
