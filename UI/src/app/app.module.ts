@@ -48,8 +48,16 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTreeModule } from '@angular/material/tree';
 import { OverlayModule } from '@angular/cdk/overlay';
+import { HttpClientModule } from '@angular/common/http';
+import { LayoutModule } from '@angular/cdk/layout';
 import { ToolbarComponent } from './toolbar/toolbar.component';
 import { TypeselComponent } from './typesel/typesel.component';
+import { TableComponent } from './table/table.component';
+import { BreadComponent } from './bread/bread.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { NewdirComponent } from './toolbar/newdir/newdir.component';
+import { UploadComponent } from './upload/upload.component';
+import { ProgressComponent } from './progress/progress.component';
 const AllMaterialModules = [
   A11yModule,
   ClipboardModule,
@@ -94,18 +102,27 @@ const AllMaterialModules = [
   MatTreeModule,
   OverlayModule,
   PortalModule,
-  ScrollingModule,];
+  ScrollingModule,
+  LayoutModule];
 
 
 @NgModule({
   declarations: [
     AppComponent,
     ToolbarComponent,
-    TypeselComponent
+    TypeselComponent,
+    TableComponent,
+    BreadComponent,
+    NewdirComponent,
+    UploadComponent,
+    ProgressComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
+    ReactiveFormsModule,
+    FormsModule,
+    HttpClientModule,
     ...AllMaterialModules,
     BrowserAnimationsModule
   ],

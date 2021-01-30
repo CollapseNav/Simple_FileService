@@ -12,6 +12,8 @@ export class TypeselComponent implements OnInit {
   @Input() title: string = 'Title';
   @Output() sel = new EventEmitter<any>();
   @Input() config!: SelConfig;
+
+
   ngOnInit() { }
   isSelectAll(selist: MatSelectionList): boolean {
     return this.config.list.length == selist.selectedOptions.selected.length;

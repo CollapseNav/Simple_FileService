@@ -1,12 +1,13 @@
-<app-toolbar (collapse)="snav.toggle()"></app-toolbar>
+<app-toolbar [table]="table" (collapse)="toggleEmit(snav,$event)"></app-toolbar>
 
 <mat-sidenav-container>
-  <mat-sidenav #snav [fixedInViewport]="true" [mode]="'side'" fixedTopGap="64">
+  <mat-sidenav #snav [fixedInViewport]="true" [mode]="'side'" fixedTopGap="64" [opened]="true">
     <mat-nav-list>
-      <app-typesel [title]="'文件类型'" [config]="selconfig" (sel)="testEmit($event)">
+      <app-typesel [title]="'文件类型'" [config]="selconfig">
       </app-typesel>
     </mat-nav-list>
   </mat-sidenav>
-  <mat-sidenav-content>
+  <mat-sidenav-content class="nav-content">
+    <app-table #table></app-table>
   </mat-sidenav-content>
 </mat-sidenav-container>

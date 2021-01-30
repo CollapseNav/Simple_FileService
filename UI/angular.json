@@ -13,7 +13,7 @@
           "style": "sass"
         },
         "@schematics/angular:application": {
-          "strict": false
+          "strict": true
         }
       },
       "root": "",
