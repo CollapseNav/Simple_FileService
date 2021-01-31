@@ -29,6 +29,9 @@ namespace Api.Migrations
                         .HasColumnType("TEXT")
                         .HasMaxLength(100);
 
+                    b.Property<Guid?>("FileTypeId")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsVisible")
                         .HasColumnType("INTEGER");
 
@@ -46,7 +49,12 @@ namespace Api.Migrations
                         .HasColumnType("TEXT")
                         .HasMaxLength(20);
 
+                    b.Property<Guid?>("TypeId")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("FileTypeId");
 
                     b.HasIndex("ParentId");
 
@@ -55,8 +63,8 @@ namespace Api.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("a32bf347-3472-4a59-af9c-6241c2e33dc3"),
-                            AddTime = new DateTime(2021, 1, 24, 18, 47, 16, 756, DateTimeKind.Local).AddTicks(1947),
+                            Id = new Guid("353b4b8b-d59c-4d64-8e5c-9faedfc20cc0"),
+                            AddTime = new DateTime(2021, 1, 29, 22, 19, 23, 953, DateTimeKind.Local).AddTicks(7666),
                             FileName = "root",
                             IsVisible = true,
                             MapPath = ""
@@ -140,6 +148,10 @@ namespace Api.Migrations
 
             modelBuilder.Entity("Api.Model.Dir", b =>
                 {
+                    b.HasOne("Api.Model.FileType", "FileType")
+                        .WithMany()
+                        .HasForeignKey("FileTypeId");
+
                     b.HasOne("Api.Model.Dir", "Parent")
                         .WithMany("Dirs")
                         .HasForeignKey("ParentId");

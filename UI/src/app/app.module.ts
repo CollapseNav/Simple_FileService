@@ -56,8 +56,7 @@ import { TableComponent } from './table/table.component';
 import { BreadComponent } from './bread/bread.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NewdirComponent } from './toolbar/newdir/newdir.component';
-import { UploadComponent } from './upload/upload.component';
-import { ProgressComponent } from './progress/progress.component';
+import { UploadComponent } from './toolbar/upload/upload.component';
 const AllMaterialModules = [
   A11yModule,
   ClipboardModule,
@@ -115,7 +114,6 @@ const AllMaterialModules = [
     BreadComponent,
     NewdirComponent,
     UploadComponent,
-    ProgressComponent
   ],
   imports: [
     BrowserModule,

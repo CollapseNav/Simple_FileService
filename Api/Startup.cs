@@ -29,6 +29,10 @@ namespace Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddSpaStaticFiles(configuration =>
+            {
+                configuration.RootPath = "dist";
+            });
             var fileoption = Configuration.GetSection("FileServConfig");
             // services.Configure<FileServConfig>(fileoption);
             FileConfig = fileoption.Get<FileServConfig>();
@@ -76,26 +80,27 @@ namespace Api
                         options.IncludeXmlComments(item.FullName, true);
                     }
 
-                    // // 可以在header中添加 全局的 token
-                    // options.AddSecurityDefinition("token", new OpenApiSecurityScheme
-                    // {
-                    //     Description = "JWT授权(数据将在请求头中进行传输) 在下方输入Bearer {token} 即可，注意中间有空格",
-                    //     Name = "Authorization",
-                    //     In = ParameterLocation.Header,
-                    //     Type = SecuritySchemeType.ApiKey
-                    // });
-                    // options.AddSecurityRequirement(new OpenApiSecurityRequirement{
-                    //     {
-                    //         new OpenApiSecurityScheme{
-                    //             Reference = new OpenApiReference{
-                    //                 Id = "token",
-                    //                 Type = ReferenceType.SecurityScheme
-                    //             }
-                    //         },
-                    //         Array.Empty<string>()
-                    //     }
-                    // });
-                    // options.OperationFilter<AddHeader>();
+                    /*// 可以在header中添加 全局的 token
+                    options.AddSecurityDefinition("token", new OpenApiSecurityScheme
+                    {
+                        Description = "JWT授权(数据将在请求头中进行传输) 在下方输入Bearer {token} 即可，注意中间有空格",
+                        Name = "Authorization",
+                        In = ParameterLocation.Header,
+                        Type = SecuritySchemeType.ApiKey
+                    });
+                    options.AddSecurityRequirement(new OpenApiSecurityRequirement{
+                        {
+                            new OpenApiSecurityScheme{
+                                Reference = new OpenApiReference{
+                                    Id = "token",
+                                    Type = ReferenceType.SecurityScheme
+                                }
+                            },
+                            Array.Empty<string>()
+                        }
+                    });
+                    options.OperationFilter<AddHeader>();
+                    */
                 }
             );
         }
@@ -109,7 +114,7 @@ namespace Api
             }
 
             app.UseCors();
-            // app.UseCors("notany");
+            app.UseSpaStaticFiles();
 
             app.UseStaticFiles(new StaticFileOptions
             {
@@ -140,6 +145,10 @@ namespace Api
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+            });
+            app.UseSpa(spa =>
+            {
+                spa.Options.SourcePath = "./";
             });
         }
     }
