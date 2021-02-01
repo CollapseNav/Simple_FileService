@@ -37,7 +37,7 @@ export class TableComponent implements OnInit {
     });
   };
   doubleClick(dir: Dir) {
-    this.http.get<Dir>(`${environment.BaseUrl}${TableApi.getDirInfo}`, { params: { id: dir.id } }).subscribe(res => {
+    this.http.get<Dir>(`${environment.BaseUrl}${TableApi.defaultDir}/${dir.id}`).subscribe(res => {
       this.resetTableData(res);
     });
     // this.tableDir.dirs.push(dir);

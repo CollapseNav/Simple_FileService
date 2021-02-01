@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,7 +7,6 @@ using Api.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Api.Controller
 {
@@ -27,8 +25,8 @@ namespace Api.Controller
             return _db.WhereIf(input.MapPath, item => item.MapPath == input.MapPath);
         }
 
-        [HttpPost, Route("CreateDir")]
-        public async Task<Dir> CreateDir([FromBody] Dir input)
+        [HttpPost]
+        public async override Task<Dir> AddAsync([FromBody] Dir input)
         {
             input.Init();
             input.MapPath = string.Empty;
@@ -38,13 +36,12 @@ namespace Api.Controller
             }
             else if (input.ParentId.HasValue)
             {
-                var dir = await _db.FindAsync(input.ParentId);
+                var dir = await FindAsync(input.ParentId);
                 input.MapPath += dir.MapPath + "/" + input.FileName;
             }
             if (Directory.Exists(input.MapPath)) return null;
 
-
-            await AddAsync(input);
+            await base.AddAsync(input);
 
             Directory.CreateDirectory(_config.FileStore + _config.FullPath + input.MapPath);
             return input;
@@ -64,15 +61,6 @@ namespace Api.Controller
         {
             var dir = await _db.Where(item => item.Id == id).Include(item => item.FileType).Include(item => item.Dirs).Include(item => item.Files).FirstOrDefaultAsync();
             return dir;
-        }
-
-        /// <summary>
-        /// 根据Id获取文件信息
-        /// </summary>
-        [HttpGet("GetDirInfo")]
-        public async Task<Dir> GetDirInfo(Guid? id)
-        {
-            return await FindAsync(id);
         }
     }
 }

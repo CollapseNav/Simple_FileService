@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Api.Common;
@@ -8,7 +5,6 @@ using Api.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Api.Controller
 {
@@ -40,17 +36,23 @@ namespace Api.Controller
         }
 
 
-        [HttpPost, Route("Add")]
-        public virtual async Task AddAsync(T entity, bool autoSave = true)
+        [HttpPost]
+        public virtual async Task<T> AddAsync(T entity)
         {
             await _db.AddAsync(entity);
-            if (autoSave)
-                await SaveChangesAsync();
+            await SaveChangesAsync();
+            return entity;
         }
-        [HttpGet, Route("Find")]
+        [HttpGet, Route("{id}")]
         public virtual async Task<T> FindAsync(object id)
         {
             return await _db.FindAsync(id);
+        }
+        [HttpDelete, Route("{id}")]
+        public virtual async Task DeleteAsync(object id)
+        {
+            _db.Remove(await FindAsync(id));
+            await SaveChangesAsync();
         }
     }
 }

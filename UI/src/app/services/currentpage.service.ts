@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { TableApi } from '../api/tableApi';
 import { Dir, MFile, SizeType } from '../table/table/fileinfo';
 
 @Injectable({

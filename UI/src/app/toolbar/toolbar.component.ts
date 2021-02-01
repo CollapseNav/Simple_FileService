@@ -15,15 +15,11 @@ import { UploadComponent } from './upload/upload.component';
 })
 export class ToolbarComponent implements OnInit {
   @Input() table: TableComponent;
-
   @Output() collapse = new EventEmitter<boolean>();
-
-  isHandset: boolean = false;
+  @Input() isHandset: boolean;
 
   constructor(public cur: CurrentpageService,
-    public dialog: MatDialog,
-    public uploadServ: UploadService,
-    public http: HttpClient) {
+    public dialog: MatDialog,) {
   }
 
   ngOnInit(): void {

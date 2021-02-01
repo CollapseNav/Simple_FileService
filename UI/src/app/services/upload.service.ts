@@ -24,7 +24,7 @@ export class UploadService {
   uploadFile(file: UploadFile): Observable<MFile> {
     const formdata = new FormData();
     formdata.append('file', file.file);
-    return this.http.post(`${environment.BaseUrl}${TableApi.uploadFile}/${this.cur.getCurrentPage().id}`, formdata, { reportProgress: true, observe: 'events' }).pipe(
+    return this.http.post(`${environment.BaseUrl}${TableApi.defaultFile}/${this.cur.getCurrentPage().id}`, formdata, { reportProgress: true, observe: 'events' }).pipe(
       map((event: HttpEvent<any>) => this.getInfo(event, file))
     );
   }

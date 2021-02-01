@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
@@ -9,12 +7,7 @@ using Api.Common;
 using Api.Model;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.StaticFiles;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Api.Controller
 {
@@ -25,14 +18,13 @@ namespace Api.Controller
         public FileController(ILogger<FileController> logger, FileServConfig config, FileDbContext dbContext, DirController dir) : base(logger, config, dbContext)
         {
             _dir = dir;
-            var mm = _context.Database.GetMigrations();
         }
 
         /// <summary>
         /// 单文件上传
         /// </summary>
         [DisableRequestSizeLimit]
-        [HttpPost, Route("PostFile/{dirId}")]
+        [HttpPost, Route("{dirId}")]
         public async Task<Model.File> PostFile(Guid dirId)
         {
             var file = HttpContext.Request.Form.Files[0];
@@ -77,7 +69,7 @@ namespace Api.Controller
         /// <summary>
         /// 根据文件Id获取文件
         /// </summary>
-        [HttpGet, Route("GetFile/{id}")]
+        [HttpGet, Route("download/{id}")]
         public async Task<IActionResult> GetFile(Guid? id)
         {
             var range = Request.Headers["Range"].ToString();
@@ -97,15 +89,6 @@ namespace Api.Controller
             Response.Headers.Add("Accept-Ranges", "bytes");
             Response.Headers.Add("Content-Range", ((string.IsNullOrEmpty(range.ToString()) ? 0 : int.Parse(range)) + (long.Parse(file.Size) - 1)).ToString());
             return new FileStreamResult(memoryStream, "application/octet-stream");
-        }
-
-        /// <summary>
-        /// 根据Id获取文件信息
-        /// </summary>
-        [HttpGet, Route("GetFileInfo")]
-        public async Task<Model.File> GetFileInfo(Guid? id)
-        {
-            return await FindAsync(id);
         }
     }
 }
