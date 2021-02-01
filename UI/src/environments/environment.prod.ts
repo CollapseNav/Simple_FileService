@@ -1,3 +1,4 @@
 export const environment = {
-  production: true
+  BaseUrl: 'https://fs.collapsenav.cn',
+  production: false
 };

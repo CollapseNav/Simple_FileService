@@ -1,6 +1,8 @@
-import { MatButtonModule } from "@angular/material/button";
-import { MatRipple } from "@angular/material/core";
-
+export interface TableConfig<T> {
+  url?: string;
+  downloadUrl?: string;
+  columns: TableColumn<T>[];
+}
 export interface TableColumn<T> {
   label: string;
   valIndex?: string;
@@ -14,7 +16,10 @@ export interface TableColumn<T> {
 export interface TableColumnButton<T> {
   content: string;
   style?: ButtonStyle;
-  url?: (item: T) => any;
+  isHidden?: boolean | ((item: T) => any);
+  disabled?: boolean | ((item: T) => any);
+  url?: string;
+  getUrl?: (item: T) => any;
   color?: string;
   click?: (item: T) => any;
 }

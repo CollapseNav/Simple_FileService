@@ -29,7 +29,6 @@ export class UploadService {
     );
   }
 
-
   getInfo(event: HttpEvent<any>, file: UploadFile) {
     switch (event.type) {
       case HttpEventType.UploadProgress:

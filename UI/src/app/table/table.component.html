@@ -20,7 +20,7 @@
                   <button *ngSwitchCase="btnStyle.raised" mat-raised-button>
                     {{btn.content}}
                   </button>
-                  <a *ngSwitchCase="btnStyle.link" [href]="btn.url(element)" mat-raised-button>
+                  <a *ngSwitchCase="btnStyle.link" [href]="tableConfig.downloadUrl+'/'+element.id" mat-raised-button>
                     {{btn.content}}
                   </a>
                 </ng-container>

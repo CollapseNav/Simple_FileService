@@ -6,7 +6,7 @@ import { environment } from 'src/environments/environment';
 import { TableApi } from '../api/tableApi';
 import { CurrentpageService } from '../services/currentpage.service';
 import { BaseFile, Dir, SizeType } from './table/fileinfo';
-import { ButtonStyle, TableColumn } from './table/tablecolumn';
+import { ButtonStyle, TableColumn, TableConfig } from './table/tablecolumn';
 
 
 @Component({
@@ -19,46 +19,9 @@ export class TableComponent implements OnInit {
   btnStyle = ButtonStyle;
   @ViewChild(MatSort) sort: MatSort;
 
-  styleBtn: string = 'mat-button';
-
   /** 表格的列配置 */
-  @Input() column: TableColumn<BaseFile>[] = [
-    { label: 'Name', valIndex: 'fileName', sort: true, format: item => item.fileName },
-    { label: 'CreateTime', valIndex: 'addTime', sort: true, format: item => new Date(item.addTime).toLocaleDateString() },
-    { label: 'Ext', valIndex: 'ext', sort: true },
-    { label: 'Size', valIndex: 'size', sort: true, format: item => this.resize(item.size) },
-    {
-      label: 'Actions', valIndex: 'actions',
-      buttons: [
-        {
-          content: '下载', style: ButtonStyle.link, url: item => {
-            return `${environment.BaseUrl}${TableApi.downloadFile}/${item.id}`;
-          }
-        }
-      ],
-    },
-  ];
-
-  resize(size: number) {
-    if (this.getSize(size, SizeType.B)) {
-      return this.getSize(size, SizeType.B) + 'B';
-    }
-    if (this.getSize(size, SizeType.K)) {
-      return this.getSize(size, SizeType.K) + 'K';
-    }
-    if (this.getSize(size, SizeType.M)) {
-      return this.getSize(size, SizeType.M) + 'M';
-    }
-    if (this.getSize(size, SizeType.G)) {
-      return this.getSize(size, SizeType.G) + 'G';
-    }
-    return 0;
-  }
-
-  getSize(size: number, type: SizeType): string | boolean {
-    var result = size / type;
-    return result > 1 && result < 1024 ? result.toFixed(2) : false;
-  }
+  @Input() tableConfig: TableConfig<BaseFile>;
+  column: TableColumn<BaseFile>[];
 
   tableDir: Dir;
 
@@ -67,6 +30,7 @@ export class TableComponent implements OnInit {
 
   constructor(public http: HttpClient, public cur: CurrentpageService) { }
   ngOnInit(): void {
+    this.column = this.tableConfig.columns;
     this.displayedColumns = this.column.map(item => item.valIndex);
     this.http.get<Dir>(`${environment.BaseUrl}${TableApi.getRoot}`).subscribe((res: Dir) => {
       this.resetTableData(res);
