@@ -7,6 +7,6 @@
   </mat-form-field>
 </div>
 <div mat-dialog-actions class="action">
-  <button mat-raised-button (click)="onNoClick()">取消</button>
-  <button #yes mat-raised-button [color]="'accent'" [mat-dialog-close]="newDirName">确定</button>
+  <button mat-raised-button (click)="close()">取消</button>
+  <button #yes mat-raised-button [color]="'accent'" (click)="addNewDir(newDirName)">确定</button>
 </div>

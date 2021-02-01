@@ -19,10 +19,14 @@ export class NewdirComponent implements OnInit {
 
   ngOnInit(): void {
   }
-  onNoClick() {
+  close() {
     this.dialogRef.close();
   }
-  onEnter(data) {
+  onEnter(data: string): void {
+    this.addNewDir(data);
+  }
+
+  addNewDir(data: string): void {
 
     this.http.post<Dir>(`${environment.BaseUrl}${TableApi.createNewDir}`, { fileName: data, parentId: this.cur.getCurrentPage().id }).subscribe(res => {
       this.cur.addNewDirCur(res);
