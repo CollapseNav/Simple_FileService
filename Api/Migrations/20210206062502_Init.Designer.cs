@@ -9,14 +9,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Api.Migrations
 {
     [DbContext(typeof(FileDbContext))]
-    [Migration("20210129141924_init")]
-    partial class init
+    [Migration("20210206062502_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.10");
+                .HasAnnotation("ProductVersion", "5.0.2");
 
             modelBuilder.Entity("Api.Model.Dir", b =>
                 {
@@ -27,11 +27,12 @@ namespace Api.Migrations
                     b.Property<DateTime?>("AddTime")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("FileName")
-                        .HasColumnType("TEXT")
-                        .HasMaxLength(100);
+                    b.Property<string>("Ext")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("FileTypeId")
+                    b.Property<string>("FileName")
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsVisible")
@@ -44,29 +45,29 @@ namespace Api.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Size")
-                        .HasColumnType("TEXT")
-                        .HasMaxLength(50);
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Sys")
-                        .HasColumnType("TEXT")
-                        .HasMaxLength(20);
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid?>("TypeId")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FileTypeId");
-
                     b.HasIndex("ParentId");
+
+                    b.HasIndex("TypeId");
 
                     b.ToTable("Dirs");
 
                     b.HasData(
                         new
                         {
-                            Id = new Guid("353b4b8b-d59c-4d64-8e5c-9faedfc20cc0"),
-                            AddTime = new DateTime(2021, 1, 29, 22, 19, 23, 953, DateTimeKind.Local).AddTicks(7666),
+                            Id = new Guid("ca2ee4ba-b4db-4f06-99f6-98df27952663"),
+                            AddTime = new DateTime(2021, 2, 6, 14, 25, 2, 145, DateTimeKind.Local).AddTicks(7123),
                             FileName = "root",
                             IsVisible = true,
                             MapPath = ""
@@ -86,14 +87,11 @@ namespace Api.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Ext")
-                        .HasColumnType("TEXT")
-                        .HasMaxLength(20);
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("FileName")
-                        .HasColumnType("TEXT")
-                        .HasMaxLength(100);
-
-                    b.Property<Guid?>("FileTypeId")
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsVisible")
@@ -106,21 +104,21 @@ namespace Api.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Size")
-                        .HasColumnType("TEXT")
-                        .HasMaxLength(50);
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Sys")
-                        .HasColumnType("TEXT")
-                        .HasMaxLength(20);
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid?>("TypeId")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FileTypeId");
-
                     b.HasIndex("ParentId");
+
+                    b.HasIndex("TypeId");
 
                     b.ToTable("Files");
                 });
@@ -150,24 +148,39 @@ namespace Api.Migrations
 
             modelBuilder.Entity("Api.Model.Dir", b =>
                 {
-                    b.HasOne("Api.Model.FileType", "FileType")
-                        .WithMany()
-                        .HasForeignKey("FileTypeId");
-
                     b.HasOne("Api.Model.Dir", "Parent")
                         .WithMany("Dirs")
                         .HasForeignKey("ParentId");
+
+                    b.HasOne("Api.Model.FileType", "FileType")
+                        .WithMany()
+                        .HasForeignKey("TypeId");
+
+                    b.Navigation("FileType");
+
+                    b.Navigation("Parent");
                 });
 
             modelBuilder.Entity("Api.Model.File", b =>
                 {
-                    b.HasOne("Api.Model.FileType", "FileType")
-                        .WithMany()
-                        .HasForeignKey("FileTypeId");
-
                     b.HasOne("Api.Model.Dir", "Parent")
                         .WithMany("Files")
                         .HasForeignKey("ParentId");
+
+                    b.HasOne("Api.Model.FileType", "FileType")
+                        .WithMany()
+                        .HasForeignKey("TypeId");
+
+                    b.Navigation("FileType");
+
+                    b.Navigation("Parent");
+                });
+
+            modelBuilder.Entity("Api.Model.Dir", b =>
+                {
+                    b.Navigation("Dirs");
+
+                    b.Navigation("Files");
                 });
 #pragma warning restore 612, 618
         }

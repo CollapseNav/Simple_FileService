@@ -29,6 +29,11 @@ namespace Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
+            services.AddScoped<DirController, DirController>();
+            services.AddScoped<FileController, FileController>();
+            services.AddScoped<FileTypeController, FileTypeController>();
+
             services.AddSpaStaticFiles(configuration =>
             {
                 configuration.RootPath = "dist";
@@ -40,7 +45,12 @@ namespace Api
             // 添加 dbcontext 根据自己的情况可以换成其他的 数据库
             services.AddDbContext<FileDbContext>(option =>
             {
-                option.UseSqlite(Configuration.GetConnectionString("Default"));
+                option.UseSqlite(Configuration.GetConnectionString("Default")
+                // , options =>
+                // {
+                //     options.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                // }
+                );
             });
             // 一般来说像文件服务这种东西 需要添加跨域设置
             services.AddCors(option =>
@@ -51,10 +61,6 @@ namespace Api
                         .AllowAnyHeader()
                         .AllowAnyMethod();
                 });
-                // option.AddPolicy("notany", builder =>
-                // {
-                //     builder.WithOrigins("http://*****,https://*****").AllowAnyHeader().AllowAnyMethod();
-                // });
             });
 
             // 限制文件(body)大小
@@ -65,15 +71,12 @@ namespace Api
             // 注册 配置
             services.AddSingleton(FileConfig);
 
-            services.AddScoped<DirController, DirController>();
-            services.AddScoped<FileController, FileController>();
-
             services.AddSwaggerGen(
                 options =>
                 {
                     options.SwaggerDoc("file", new OpenApiInfo { Title = "FileService API", Version = "file" });
                     options.DocInclusionPredicate((docName, description) => true);
-                    DirectoryInfo d = new DirectoryInfo(AppContext.BaseDirectory);
+                    DirectoryInfo d = new(AppContext.BaseDirectory);
                     FileInfo[] files = d.GetFiles("*.xml");
                     foreach (var item in files)
                     {

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -30,35 +29,42 @@ namespace Api.Common
             get { return "/root"; }
             private set {; }
         }
+        private string limitSize;
+        public long MaxSize { get; private set; }
+        public string ServeMapPath { get; set; }
         /// <summary>
         /// 单次上传允许的最大size 单位为 k
         /// </summary>
-        /// <value></value>
-        public string LimitSize { get; set; }
-        public long MaxSize
+        public string LimitSize
         {
-            get
+            get => limitSize;
+            set
             {
-                var limit = LimitSize;
-                limit.Replace(",", "");
+                limitSize = value;
+                var limit = limitSize;
+                limit = limit.Replace(",", "");
                 var tag = limit.ToLower().TakeLast(1).First().ToString();
                 switch (tag)
                 {
                     case "m":
                         {
-                            limit.Replace(tag, "");
-                            return long.Parse(limit) * 1024;
+                            limit = limit.Replace(tag, "");
+                            MaxSize = long.Parse(limit) * 1024;
+                            break;
                         }
                     case "g":
                         {
-                            limit.Replace(tag, "");
-                            return long.Parse(limit) * 1024 * 1024;
+                            limit = limit.Replace(tag, "");
+                            MaxSize = long.Parse(limit) * 1024 * 1024;
+                            break;
                         }
-                    default: { return long.Parse(limit); }
+                    default:
+                        {
+                            MaxSize = long.Parse(limit);
+                            break;
+                        }
                 }
             }
-            private set {; }
         }
-        public string ServeMapPath { get; set; }
     }
 }

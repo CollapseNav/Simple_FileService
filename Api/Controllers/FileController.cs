@@ -34,11 +34,11 @@ namespace Api.Controller
         private async Task<Model.File> SaveFile(Guid dirId, IFormFile file)
         {
             var dir = await _dir.FindAsync(dirId);
-            var model = new Model.File { MapPath = dir.MapPath, ParentId = dirId }.Init(file);
+            var model = await new Model.File { MapPath = dir.MapPath, ParentId = dirId }.InitAsync(file);
 
             try
             {
-                using FileStream fs = new FileStream(_config.FileStore + _config.FullPath + model.MapPath, FileMode.CreateNew);
+                using FileStream fs = new(_config.FileStore + _config.FullPath + model.MapPath, FileMode.CreateNew);
                 await file.CopyToAsync(fs);
             }
             catch (IOException)

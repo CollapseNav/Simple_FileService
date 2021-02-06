@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Api.Common;
@@ -15,7 +16,7 @@ namespace Api.Controller
         protected readonly FileDbContext _context;
         protected readonly ILogger _log;
         protected readonly DbSet<T> _db;
-        public BaseController(ILogger<FileController> logger, FileServConfig config, FileDbContext dbContext)
+        public BaseController(ILogger<BaseController<T>> logger, FileServConfig config, FileDbContext dbContext)
         {
             _log = logger;
             _config = config;
@@ -37,19 +38,21 @@ namespace Api.Controller
 
 
         [HttpPost]
-        public virtual async Task<T> AddAsync(T entity)
+        public virtual async Task<T> AddAsync([FromBody] T entity)
         {
+            entity.Init();
             await _db.AddAsync(entity);
             await SaveChangesAsync();
             return entity;
         }
         [HttpGet, Route("{id}")]
-        public virtual async Task<T> FindAsync(object id)
+        public virtual async Task<T> FindAsync(Guid? id)
         {
-            return await _db.FindAsync(id);
+            var data = await _db.FindAsync(id);
+            return data;
         }
         [HttpDelete, Route("{id}")]
-        public virtual async Task DeleteAsync(object id)
+        public virtual async Task DeleteAsync(Guid? id)
         {
             _db.Remove(await FindAsync(id));
             await SaveChangesAsync();

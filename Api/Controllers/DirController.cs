@@ -6,6 +6,7 @@ using Api.Common;
 using Api.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace Api.Controller
@@ -13,32 +14,25 @@ namespace Api.Controller
     [Route("api/[controller]")]
     public class DirController : BaseController<Dir>
     {
-        private readonly DbSet<Model.File> _file;
 
-        public DirController(ILogger<FileController> logger, FileServConfig config, FileDbContext dbContext) : base(logger, config, dbContext)
+        public DirController(ILogger<DirController> logger, FileServConfig config, FileDbContext dbContext) : base(logger, config, dbContext)
         {
-            _file = _context.Files;
         }
 
         protected override IQueryable<Dir> GetQuery(Dir input)
         {
-            return _db.WhereIf(input.MapPath, item => item.MapPath == input.MapPath);
+            return _db
+            .Include(item => item.Dirs)
+            .Include(item => item.Files)
+            .WhereIf(input.MapPath, item => item.MapPath == input.MapPath)
+            .WhereIf(input.Id.HasValue, item => item.Id == input.Id)
+            ;
         }
 
         [HttpPost]
         public async override Task<Dir> AddAsync([FromBody] Dir input)
         {
-            input.Init();
-            input.MapPath = string.Empty;
-            if (input.Parent != null)
-            {
-                input.MapPath += input.Parent.MapPath + "/" + input.FileName;
-            }
-            else if (input.ParentId.HasValue)
-            {
-                var dir = await FindAsync(input.ParentId);
-                input.MapPath += dir.MapPath + "/" + input.FileName;
-            }
+            await input.InitAsync();
             if (Directory.Exists(input.MapPath)) return null;
 
             await base.AddAsync(input);
@@ -51,7 +45,7 @@ namespace Api.Controller
         public async Task<Dir> GetRootDir()
         {
             var query = _db.Where(item => item.MapPath == string.Empty);
-            if (query.Count() > 0)
+            if (query.Any())
                 return await query.Include(item => item.Dirs).Include(item => item.Files).FirstAsync();
             else return null;
         }
@@ -61,6 +55,12 @@ namespace Api.Controller
         {
             var dir = await _db.Where(item => item.Id == id).Include(item => item.FileType).Include(item => item.Dirs).Include(item => item.Files).FirstOrDefaultAsync();
             return dir;
+        }
+
+
+        public override async Task<Dir> FindAsync(Guid? id)
+        {
+            return await GetQuery(new Dir { Id = id }).FirstOrDefaultAsync();
         }
     }
 }

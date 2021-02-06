@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+using Api.Controller;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Api.Model
 {
@@ -12,5 +15,13 @@ namespace Api.Model
         public virtual Dir Parent { get; set; }
         public virtual List<File> Files { get; set; }
         public virtual List<Dir> Dirs { get; set; }
+        public async Task InitAsync()
+        {
+            base.Init();
+
+            MapPath += "/" + FileName;
+            Ext = string.Empty;
+            await InitTypeId();
+        }
     }
 }

@@ -7,8 +7,7 @@ namespace Api.Model
 {
     public class FileDbContext : DbContext
     {
-
-        private FileServConfig _config;
+        private readonly FileServConfig _config;
         public DbSet<File> Files { get; set; }
         public DbSet<Dir> Dirs { get; set; }
         public DbSet<FileType> FileTypes { get; set; }
