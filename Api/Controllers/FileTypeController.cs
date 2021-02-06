@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Api.Common;
@@ -26,7 +27,7 @@ namespace Api.Controller
         }
 
         [HttpGet, Route("GetTypeId")]
-        public async Task<FileType> GetTypeIdByExtAsync(string ext)
+        public async Task<FileType> GetTypeByExtAsync(string ext)
         {
             var query = GetQuery(new FileType { Ext = ext });
             return await query.FirstOrDefaultAsync();

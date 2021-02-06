@@ -14,9 +14,10 @@ namespace Api.Controller
     [Route("api/[controller]")]
     public class DirController : BaseController<Dir>
     {
-
-        public DirController(ILogger<DirController> logger, FileServConfig config, FileDbContext dbContext) : base(logger, config, dbContext)
+        private readonly FileTypeController _fileType;
+        public DirController(ILogger<DirController> logger, FileServConfig config, FileDbContext dbContext, FileTypeController fileTypeController) : base(logger, config, dbContext)
         {
+            _fileType = fileTypeController;
         }
 
         protected override IQueryable<Dir> GetQuery(Dir input)
@@ -32,12 +33,15 @@ namespace Api.Controller
         [HttpPost]
         public async override Task<Dir> AddAsync([FromBody] Dir input)
         {
-            await input.InitAsync();
+            input.Init();
             if (Directory.Exists(input.MapPath)) return null;
 
-            await base.AddAsync(input);
+            if (!input.TypeId.HasValue)
+                input.TypeId = (await _fileType.GetTypeByExtAsync(input.Ext)).Id;
 
+            await base.AddAsync(input);
             Directory.CreateDirectory(_config.FileStore + _config.FullPath + input.MapPath);
+
             return input;
         }
 

@@ -4,7 +4,10 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Api.Common;
 using Api.Controller;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Api.Model
@@ -25,18 +28,5 @@ namespace Api.Model
         public bool IsVisible { get; set; } = true;
         [MaxLength(20)]
         public string Ext { get; set; }
-
-        public async Task InitTypeId()
-        {
-            var provider = new ServiceCollection().BuildServiceProvider();
-            var fileTypeController = provider.GetService<FileTypeController>();
-            var filetype = await fileTypeController.GetTypeIdByExtAsync(Ext);
-            if (filetype == null)
-            {
-                TypeId = null;
-                return;
-            }
-            TypeId = filetype.Id;
-        }
     }
 }

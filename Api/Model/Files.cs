@@ -17,13 +17,12 @@ namespace Api.Model
         public virtual Dir Parent { get; set; }
         public override string MapPath { get; set; }
 
-        public async Task<File> InitAsync(IFormFile file)
+        public File Init(IFormFile file)
         {
             base.Init();
 
             Ext = Path.GetExtension(file.FileName);
             ContentType = file.ContentType;
-            await InitTypeId();
             MapPath += "/" + file.FileName;
             Size = file.Length.ToString();
             FileName = file.FileName;

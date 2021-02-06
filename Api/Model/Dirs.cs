@@ -15,13 +15,12 @@ namespace Api.Model
         public virtual Dir Parent { get; set; }
         public virtual List<File> Files { get; set; }
         public virtual List<Dir> Dirs { get; set; }
-        public async Task InitAsync()
+        public override void Init()
         {
             base.Init();
 
             MapPath += "/" + FileName;
             Ext = string.Empty;
-            await InitTypeId();
         }
     }
 }

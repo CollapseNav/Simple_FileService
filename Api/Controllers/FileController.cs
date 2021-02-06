@@ -15,9 +15,11 @@ namespace Api.Controller
     public class FileController : BaseController<Model.File>
     {
         private readonly DirController _dir;
-        public FileController(ILogger<FileController> logger, FileServConfig config, FileDbContext dbContext, DirController dir) : base(logger, config, dbContext)
+        private readonly FileTypeController _fileType;
+        public FileController(ILogger<FileController> logger, FileServConfig config, FileDbContext dbContext, DirController dir, FileTypeController fileTypeController) : base(logger, config, dbContext)
         {
             _dir = dir;
+            _fileType = fileTypeController;
         }
 
         /// <summary>
@@ -34,20 +36,28 @@ namespace Api.Controller
         private async Task<Model.File> SaveFile(Guid dirId, IFormFile file)
         {
             var dir = await _dir.FindAsync(dirId);
-            var model = await new Model.File { MapPath = dir.MapPath, ParentId = dirId }.InitAsync(file);
+            var model = new Model.File { MapPath = dir.MapPath, ParentId = dirId }.Init(file);
+            var fullFilePath = _config.FileStore + _config.FullPath + model.MapPath;
+
+            if (!model.TypeId.HasValue)
+            {
+                var fileType = await _fileType.GetTypeByExtAsync(model.Ext);
+                model.TypeId = fileType?.Id;
+            }
+            await _db.AddAsync(model);
+            _log.LogInformation($"Save File {file.FileName} , size: {file.Length}; type: {model.Ext};");
 
             try
             {
-                using FileStream fs = new(_config.FileStore + _config.FullPath + model.MapPath, FileMode.CreateNew);
+                using FileStream fs = new(fullFilePath, FileMode.CreateNew);
                 await file.CopyToAsync(fs);
+                await SaveChangesAsync();
             }
             catch (IOException)
             {
                 throw new IOException("文件上传失败,请稍候重试.");
             }
 
-            await AddAsync(model);
-            _log.LogInformation($"Save File {file.FileName} , size: {file.Length}; type: {model.Ext};");
             return model;
         }
 
@@ -66,6 +76,7 @@ namespace Api.Controller
             fileName += fileExt;
             return fileName;
         }
+
         /// <summary>
         /// 根据文件Id获取文件
         /// </summary>

@@ -30,16 +30,11 @@ namespace Api
         {
             services.AddControllers();
 
-            services.AddScoped<DirController, DirController>();
-            services.AddScoped<FileController, FileController>();
-            services.AddScoped<FileTypeController, FileTypeController>();
-
             services.AddSpaStaticFiles(configuration =>
             {
                 configuration.RootPath = "dist";
             });
             var fileoption = Configuration.GetSection("FileServConfig");
-            // services.Configure<FileServConfig>(fileoption);
             FileConfig = fileoption.Get<FileServConfig>();
 
             // 添加 dbcontext 根据自己的情况可以换成其他的 数据库
@@ -106,6 +101,11 @@ namespace Api
                     */
                 }
             );
+
+
+            services.AddScoped<FileTypeController, FileTypeController>();
+            services.AddScoped<DirController, DirController>();
+            services.AddScoped<FileController, FileController>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
