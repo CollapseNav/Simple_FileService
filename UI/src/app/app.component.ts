@@ -7,7 +7,7 @@ import { TableApi } from './api/tableApi';
 import { CurrentpageService } from './services/currentpage.service';
 import { TypeService } from './services/type.service';
 import { BaseFile } from './table/table/fileinfo';
-import { ButtonStyle, TableColumn, TableConfig } from './table/table/tablecolumn';
+import { ButtonStyle, ColumnBtnEvent, TableColumn, TableConfig } from './table/table/tablecolumn';
 import { SelConfig } from './typesel/selconfig';
 
 @Component({
@@ -32,7 +32,14 @@ export class AppComponent implements OnInit {
         label: 'Actions', valIndex: 'actions',
         buttons: [
           {
-            content: '下载', style: ButtonStyle.link, isHidden: true,
+            content: '下载', style: ButtonStyle.link,
+            getUrl: item => this.tc.downloadUrl + '/' + item.id,
+            isHidden: item => item.ext,
+          },
+          {
+            content: '删除', style: ButtonStyle.raised, color: 'warn',
+            type: ColumnBtnEvent.del,
+            getUrl: item => `${environment.BaseUrl}${item.ext ? TableApi.defaultFile : TableApi.defaultDir}`
           }
         ],
       },

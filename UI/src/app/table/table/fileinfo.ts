@@ -6,11 +6,11 @@ export interface BaseFile {
   isVisible: boolean;
   parentId: string;
   mapPath: string;
+  ext: string;
 }
 
 
 export interface MFile extends BaseFile {
-  ext: string;
   contentType: string;
 }
 

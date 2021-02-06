@@ -24,7 +24,6 @@ export class TableComponent implements OnInit {
   column: TableColumn<BaseFile>[];
 
   tableDir: Dir;
-
   displayedColumns: string[] = [];
   dataSource: MatTableDataSource<BaseFile> = new MatTableDataSource([]);
 

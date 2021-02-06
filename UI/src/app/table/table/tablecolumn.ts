@@ -16,12 +16,24 @@ export interface TableColumn<T> {
 export interface TableColumnButton<T> {
   content: string;
   style?: ButtonStyle;
-  isHidden?: boolean | ((item: T) => any);
-  disabled?: boolean | ((item: T) => any);
+  type?: ColumnBtnEvent;
+  icon?: string;
+  hidden?: boolean;
+  isHidden?: (item: T) => any;
+  disabled?: boolean;
+  isDisabled?: (item: T) => any;
   url?: string;
   getUrl?: (item: T) => any;
   color?: string;
   click?: (item: T) => any;
+  toolTip?: {
+    content: string;
+    showDelay?: number;
+  };
+}
+
+export enum ColumnBtnEvent {
+  add, del, download, edit
 }
 
 
