@@ -101,5 +101,19 @@ namespace Api.Controller
             Response.Headers.Add("Content-Range", ((string.IsNullOrEmpty(range.ToString()) ? 0 : int.Parse(range)) + (long.Parse(file.Size) - 1)).ToString());
             return new FileStreamResult(memoryStream, "application/octet-stream");
         }
+
+        public override async Task DeleteAsync(Guid? id)
+        {
+            try
+            {
+                var entity = await base.FindAsync(id);
+                var delPath = _config.FileStore + _config.FullPath + entity.MapPath;
+                _db.Remove(entity);
+                if (System.IO.File.Exists(delPath))
+                    System.IO.File.Delete(delPath);
+            }
+            catch { }
+            await SaveChangesAsync();
+        }
     }
 }

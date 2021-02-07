@@ -1,4 +1,4 @@
-<app-toolbar [table]="table" (collapse)="toggleEmit(snav,$event)"></app-toolbar>
+<app-toolbar (collapse)="toggleEmit(snav,$event)"></app-toolbar>
 
 <mat-sidenav-container>
   <mat-sidenav #snav [fixedInViewport]="true" [mode]="'side'" fixedTopGap="64" [opened]="isHandSet">

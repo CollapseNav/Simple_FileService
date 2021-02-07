@@ -1,6 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, Input, OnInit } from '@angular/core';
-import { url } from 'inspector';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { BaseFile } from '../table/fileinfo';
 import { ButtonStyle, ColumnBtnEvent, TableColumnButton } from '../table/tablecolumn';
 
@@ -13,12 +12,12 @@ export class TablebuttonComponent<T extends BaseFile> implements OnInit {
 
   @Input() btn: TableColumnButton<T>;
   @Input() item: T;
+  @Output() del = new EventEmitter<T>();
   btnStyle = ButtonStyle;
   constructor(public http: HttpClient) { }
 
   ngOnInit(): void {
-    console.log(this.btn.isHidden ? this.btn.isHidden(this.item) : false, this.item);
-  }
+  };
 
   isHidden(): boolean {
     return this.btn.isHidden ? this.btn.isHidden(this.item) : true;
@@ -34,7 +33,9 @@ export class TablebuttonComponent<T extends BaseFile> implements OnInit {
       switch (this.btn.type) {
         case ColumnBtnEvent.del:
           this.http.delete(`${this.getUrl()}/${this.item.id}`).subscribe(res => {
-
+            this.del.emit(this.item);
+            // delete this.item;
+            // this.item = null;
           });
       }
     }

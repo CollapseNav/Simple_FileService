@@ -19,8 +19,6 @@ namespace Api.Model
 
         public File Init(IFormFile file)
         {
-            base.Init();
-
             Ext = Path.GetExtension(file.FileName);
             ContentType = file.ContentType;
             MapPath += "/" + file.FileName;

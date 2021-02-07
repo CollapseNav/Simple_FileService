@@ -21,10 +21,8 @@ export class UploadComponent implements OnInit {
 
   remove(index: number) {
     this.uploadFiles.splice(index, 1);
-    // this.uploadFiles[index].show = false;
   }
   uploadFile(index: number) {
-    // this.uploadServ.uploadFile(this.uploadFiles[index]).subscribe(res => {
     this.uploadServ.uploadFile(this.uploadFiles.filter(item => item.index == index)[0]).subscribe(res => {
       if (res) {
         this.cur.addNewFileCur(res);

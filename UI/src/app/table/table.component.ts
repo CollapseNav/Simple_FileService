@@ -23,14 +23,13 @@ export class TableComponent implements OnInit {
   @Input() tableConfig: TableConfig<BaseFile>;
   column: TableColumn<BaseFile>[];
 
-  tableDir: Dir;
   displayedColumns: string[] = [];
   dataSource: MatTableDataSource<BaseFile> = new MatTableDataSource([]);
-
   constructor(public http: HttpClient, public cur: CurrentpageService) { }
   ngOnInit(): void {
     this.column = this.tableConfig.columns;
     this.displayedColumns = this.column.map(item => item.valIndex);
+    this.dataSource = this.cur.dataSource;
     this.http.get<Dir>(`${environment.BaseUrl}${TableApi.getRoot}`).subscribe((res: Dir) => {
       this.resetTableData(res);
     });
@@ -39,20 +38,11 @@ export class TableComponent implements OnInit {
     this.http.get<Dir>(`${environment.BaseUrl}${TableApi.defaultDir}/${dir.id}`).subscribe(res => {
       this.resetTableData(res);
     });
-    // this.tableDir.dirs.push(dir);
   }
 
   resetTableData(data: Dir): void {
-    this.tableDir = data;
-    this.cur.add(this.tableDir);
-    this.justSetableData(data);
-  };
-
-  justSetableData(data: Dir): void {
-    this.cur.getCurPageSub().subscribe(res => {
-      this.dataSource.data = (res.dirs as BaseFile[]).concat((res.files as BaseFile[]));
-      this.dataSource.sort = this.sort;
-    });
+    this.cur.add(data);
+    this.dataSource.sort = this.sort;
   };
 
   ngAfterViewInit() {
@@ -61,5 +51,10 @@ export class TableComponent implements OnInit {
 
   format(item: BaseFile, col: TableColumn<BaseFile>): string {
     return !!col.format ? col.format(item) : item[col.valIndex];
+  }
+
+  delete(item: BaseFile) {
+    if (item.ext) this.cur.removeFile(item);
+    else this.cur.removeDir(item);
   }
 };

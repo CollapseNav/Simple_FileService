@@ -14,7 +14,6 @@ import { UploadComponent } from './upload/upload.component';
   styleUrls: ['./toolbar.component.sass']
 })
 export class ToolbarComponent implements OnInit {
-  @Input() table: TableComponent;
   @Output() collapse = new EventEmitter<boolean>();
   @Input() isHandset: boolean;
 
@@ -31,16 +30,10 @@ export class ToolbarComponent implements OnInit {
 
   addNewFiles() {
     const newdia = this.dialog.open(UploadComponent, { minWidth: 350 });
-    newdia.afterClosed().subscribe(() => {
-      this.table.justSetableData(this.cur.getCurrentPage());
-    });
   }
 
   addNewFolder() {
     const newdia = this.dialog.open(NewdirComponent, { minWidth: 200 });
-    newdia.afterClosed().subscribe(() => {
-      this.table.justSetableData(this.cur.getCurrentPage());
-    });
   }
 
 }

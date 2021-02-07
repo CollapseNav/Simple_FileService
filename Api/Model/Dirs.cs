@@ -17,8 +17,6 @@ namespace Api.Model
         public virtual List<Dir> Dirs { get; set; }
         public override void Init()
         {
-            base.Init();
-
             MapPath += "/" + FileName;
             Ext = string.Empty;
         }

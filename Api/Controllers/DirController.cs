@@ -36,11 +36,15 @@ namespace Api.Controller
             input.Init();
             if (Directory.Exists(input.MapPath)) return null;
 
+            var fullPath = _config.FileStore + _config.FullPath + input.MapPath;
+
             if (!input.TypeId.HasValue)
                 input.TypeId = (await _fileType.GetTypeByExtAsync(input.Ext)).Id;
 
-            await base.AddAsync(input);
-            Directory.CreateDirectory(_config.FileStore + _config.FullPath + input.MapPath);
+            await _db.AddAsync(input);
+            Directory.CreateDirectory(fullPath);
+
+            await SaveChangesAsync();
 
             return input;
         }
@@ -65,6 +69,20 @@ namespace Api.Controller
         public override async Task<Dir> FindAsync(Guid? id)
         {
             return await GetQuery(new Dir { Id = id }).FirstOrDefaultAsync();
+        }
+
+        public override async Task DeleteAsync(Guid? id)
+        {
+            try
+            {
+                var entity = await base.FindAsync(id);
+                var delPath = _config.FileStore + _config.FullPath + entity.MapPath;
+                _db.Remove(entity);
+                if (Directory.Exists(delPath))
+                    Directory.Delete(delPath);
+            }
+            catch { }
+            await SaveChangesAsync();
         }
     }
 }
