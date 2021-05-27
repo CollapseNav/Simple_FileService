@@ -85,7 +85,7 @@ namespace Api.Controller
             string fileExt = Path.GetExtension(fileName);
             if (_config.UseRawName)
             {
-                fileName = fileName.Split(".")[0..^1].Join(".");
+                fileName = string.Join('.', fileName.Split(".")[0..^1]);
                 if (System.IO.File.Exists(filePath + fileName + fileExt))
                     fileName += "_" + DateTime.Now.Millisecond;
             }
