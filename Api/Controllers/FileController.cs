@@ -32,7 +32,7 @@ namespace Api.Controller
         /// 多文件上传
         /// </summary>
         [DisableRequestSizeLimit]
-        [HttpPost("PostFiles")]
+        [HttpPost, Route("PostFiles")]
         public async Task<ReturnFileMapPath> PostFiles(IFormFile[] files)
         {
             var fileIds = new List<string>();
@@ -44,7 +44,7 @@ namespace Api.Controller
         /// 单文件上传
         /// </summary>
         [DisableRequestSizeLimit]
-        [HttpPost("PostSingleFile")]
+        [HttpPost, Route("PostSingleFile")]
         public async Task<string> PostFile(IFormFile file)
         {
             return await SaveFile(file);
@@ -97,7 +97,7 @@ namespace Api.Controller
         /// <summary>
         /// 根据文件Id获取文件
         /// </summary>
-        [HttpGet("GetFile")]
+        [HttpGet, Route("GetFile")]
         public async Task<IActionResult> GetFile(Guid? id)
         {
             var range = Request.Headers["Range"].ToString();
@@ -123,7 +123,7 @@ namespace Api.Controller
         /// <summary>
         /// 根据Id获取文件信息
         /// </summary>
-        [HttpGet("GetFileInfo")]
+        [HttpGet, Route("GetFileInfo")]
         public async Task<Model.File> GetFileInfo(Guid? id)
         {
             return await _context.Files.FindAsync(id);

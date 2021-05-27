@@ -23,21 +23,38 @@ namespace Api
         }
 
         public IConfiguration Configuration { get; }
-        private FileServConfig FileConfig;
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            FileConfig = Configuration.GetSection("FileService").Get<FileServConfig>();
+            var FileConfig = Configuration.GetSection("FileService").Get<FileServConfig>();
             FileConfig.CheckAuto();
 
             // 添加 dbcontext 根据自己的情况可以换成其他的 数据库
             services.AddDbContext<FileDbContext>(option =>
             {
-                option.UseSqlite(Configuration.GetConnectionString("Sqlite"));
-                // option.UseSqlServer(Configuration.GetConnectionString("Default"));
+                var db = Configuration.GetSection("DB").Get<string>();
+                string constr = Configuration.GetConnectionString("Default");
+                switch (db)
+                {
+                    case "sqlite":
+                        {
+                            option.UseSqlite(constr);
+                            break;
+                        }
+                    case "mssql":
+                        {
+                            option.UseSqlServer(constr);
+                            break;
+                        }
+                    default:
+                        {
+                            option.UseSqlite(constr);
+                            break;
+                        }
+                }
             });
-            // 一般来说像文件服务这种东西 需要添加跨域设置 
+            // 一般来说像文件服务这种东西 需要添加跨域设置
             services.AddCors(option =>
             {
                 option.AddDefaultPolicy(builder =>
@@ -46,10 +63,18 @@ namespace Api
                         .AllowAnyHeader()
                         .AllowAnyMethod();
                 });
-                // option.AddPolicy("notany", builder =>
-                // {
-                //     builder.WithOrigins("http://*****,https://*****").AllowAnyHeader().AllowAnyMethod();
-                // });
+                string cors = Configuration.GetSection("Cors").Get<string>();
+                if (!string.IsNullOrEmpty(cors))
+                {
+                    option.AddPolicy("cors", builder =>
+                    {
+                        builder
+                        .WithOrigins(cors.Split(","))
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                    });
+                }
             });
 
             // 限制文件(body)大小
@@ -103,10 +128,12 @@ namespace Api
             {
                 app.UseDeveloperExceptionPage();
             }
+            if (!string.IsNullOrEmpty(Configuration.GetSection("Cors").Get<string>()))
+                app.UseCors("cors");
+            else
+                app.UseCors();
 
-            app.UseCors();
-            // app.UseCors("notany");
-
+            var FileConfig = Configuration.GetSection("FileService").Get<FileServConfig>();
             app.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = new PhysicalFileProvider(FileConfig.FileStore),
@@ -129,9 +156,6 @@ namespace Api
             });
 
             app.UseRouting();
-
-            // app.UseAuthentication;
-            // app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
